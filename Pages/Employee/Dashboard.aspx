@@ -160,5 +160,5 @@
 </asp:Content>
 
 <asp:Content ID="Scripts" ContentPlaceHolderID="BodyScripts" runat="server">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="../../Scripts/chart.umd.min.js"></script>
 </asp:Content>

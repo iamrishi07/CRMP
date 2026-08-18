@@ -93,6 +93,15 @@
     <Content Include="Database\Scripts\02_sequences.sql" />
     <Content Include="Database\Scripts\03_stored_procs.sql" />
     <Content Include="Database\Scripts\04_seed_data.sql" />
+      <Content Include="Scripts\chart.umd.min.js" />
+    <Content Include="Styles\fonts.css" />
+    <Content Include="Styles\fonts\inter-1.woff2" />
+    <Content Include="Styles\fonts\inter-2.woff2" />
+    <Content Include="Styles\fonts\inter-3.woff2" />
+    <Content Include="Styles\fonts\inter-4.woff2" />
+    <Content Include="Styles\fonts\inter-5.woff2" />
+    <Content Include="Styles\fonts\inter-6.woff2" />
+    <Content Include="Styles\fonts\inter-7.woff2" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Code\Models\Models.cs" />
