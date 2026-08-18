@@ -66,10 +66,15 @@ namespace CRMP.DAL
         public List<Notification> GetAll(int userId, int page = 1, int pageSize = 30)
         {
             int offset = (page - 1) * pageSize;
-            var dt = OracleHelper.ExecuteQuerySql($@"
-                SELECT * FROM NOTIFICATIONS WHERE USER_ID=:P_U
-                ORDER BY CREATED_AT DESC
-                OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY",
+            int maxRow = offset + pageSize;
+            int minRow = offset;
+            var dt = OracleHelper.ExecuteQuerySql(@"
+                SELECT * FROM (
+                    SELECT a.*, ROWNUM rnum FROM (
+                        SELECT * FROM NOTIFICATIONS WHERE USER_ID=:P_U
+                        ORDER BY CREATED_AT DESC
+                    ) a WHERE ROWNUM <= " + maxRow.ToString() + @"
+                ) WHERE rnum > " + minRow.ToString(),
                 new[] { OracleHelper.ParamInt("P_U", userId) });
 
             var list = new List<Notification>();

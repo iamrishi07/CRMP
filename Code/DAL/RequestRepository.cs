@@ -59,8 +59,12 @@ namespace CRMP.DAL
             string countSql = "SELECT COUNT(*) FROM REQUESTS r JOIN REQUEST_TYPES rt ON rt.TYPE_ID=r.TYPE_ID " + where;
             int total = Convert.ToInt32(OracleHelper.ExecuteScalarSql(countSql, parameters.ToArray()));
 
-            // Data (Oracle 12c+ OFFSET/FETCH)
-            string dataSql = BuildDetailQuery() + " " + where + " " + orderBy + " OFFSET " + offset.ToString() + " ROWS FETCH NEXT " + filter.PageSize.ToString() + " ROWS ONLY";
+            // Data (Oracle 11g pagination)
+            int maxRow = offset + filter.PageSize;
+            int minRow = offset;
+            string dataSql = "SELECT * FROM (SELECT a.*, ROWNUM rnum FROM (" +
+                             BuildDetailQuery() + " " + where + " " + orderBy + 
+                             ") a WHERE ROWNUM <= " + maxRow.ToString() + ") WHERE rnum > " + minRow.ToString();
             var dt = OracleHelper.ExecuteQuerySql(dataSql, parameters.ToArray());
 
             var items = new List<Request>();
