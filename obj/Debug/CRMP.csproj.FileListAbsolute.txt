@@ -1,0 +1,10 @@
+C:\Users\rishi\.gemini\antigravity-ide\scratch\CRMP\obj\Debug\CRMP.csproj.AssemblyReference.cache
+C:\Users\rishi\.gemini\antigravity-ide\scratch\CRMP\obj\Debug\CRMP.csproj.CoreCompileInputs.cache
+C:\Users\rishi\.gemini\antigravity-ide\scratch\CRMP\bin\CRMP.dll
+C:\Users\rishi\.gemini\antigravity-ide\scratch\CRMP\bin\CRMP.pdb
+C:\Users\rishi\.gemini\antigravity-ide\scratch\CRMP\bin\Oracle.ManagedDataAccess.dll
+C:\Users\rishi\.gemini\antigravity-ide\scratch\CRMP\bin\System.Memory.dll
+C:\Users\rishi\.gemini\antigravity-ide\scratch\CRMP\bin\System.Numerics.Vectors.dll
+C:\Users\rishi\.gemini\antigravity-ide\scratch\CRMP\obj\Debug\CRMP.csproj.Up2Date
+C:\Users\rishi\.gemini\antigravity-ide\scratch\CRMP\obj\Debug\CRMP.dll
+C:\Users\rishi\.gemini\antigravity-ide\scratch\CRMP\obj\Debug\CRMP.pdb
