@@ -10,6 +10,7 @@
     <asp:ContentPlaceHolder ID="HeadContent" runat="server"/>
 </head>
 <body>
+<form id="form1" runat="server">
 
 <!-- Announcement Banner (active announcements) -->
 <asp:Repeater ID="rptBanners" runat="server">
@@ -178,12 +179,7 @@
             </asp:Repeater>
           </div>
         </div>
-        <!-- Hidden role switch form -->
-        <form id="roleSwitchForm" method="post" action="<%=ResolveUrl("~/Handlers/RoleSwitch.ashx")%>">
-          <input type="hidden" id="hfSwitchRoleId" name="roleId"/>
-          <input type="hidden" id="hfSwitchDivId" name="divId"/>
-          <input type="hidden" name="returnUrl" value="<%=Server.UrlEncode(Request.RawUrl)%>"/>
-        </form>
+        <!-- Hidden role switch form removed, handled dynamically by portal.js -->
 
         <!-- Notification Bell -->
         <div class="notif-bell" style="position:relative">
@@ -231,5 +227,6 @@
 
 <script src="<%=ResolveUrl("~/Scripts/portal.js")%>"></script>
 <asp:ContentPlaceHolder ID="BodyScripts" runat="server"/>
+</form>
 </body>
 </html>

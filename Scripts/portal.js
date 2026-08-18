@@ -102,12 +102,24 @@ if (roleBadge && roleDropdown) {
 }
 
 function switchRole(userRoleId, divisionId) {
-    const form = document.getElementById('roleSwitchForm');
-    if (form) {
-        document.getElementById('hfSwitchRoleId').value = userRoleId;
-        document.getElementById('hfSwitchDivId').value = divisionId || '';
-        form.submit();
-    }
+    var f = document.createElement('form');
+    f.method = 'post';
+    f.action = '/Handlers/RoleSwitch.ashx';
+    
+    var i1 = document.createElement('input');
+    i1.type = 'hidden'; i1.name = 'roleId'; i1.value = userRoleId;
+    f.appendChild(i1);
+    
+    var i2 = document.createElement('input');
+    i2.type = 'hidden'; i2.name = 'divId'; i2.value = divisionId || '';
+    f.appendChild(i2);
+    
+    var i3 = document.createElement('input');
+    i3.type = 'hidden'; i3.name = 'returnUrl'; i3.value = window.location.pathname + window.location.search;
+    f.appendChild(i3);
+    
+    document.body.appendChild(f);
+    f.submit();
 }
 
 // ── Toast Notifications ────────────────────────────────────────────────────

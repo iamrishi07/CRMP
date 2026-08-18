@@ -42,7 +42,7 @@
     <!-- NuGet / ODP.NET references — install via NuGet: Oracle.ManagedDataAccess 21.x -->
     <Reference Include="Oracle.ManagedDataAccess, Version=4.122.21.1, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Oracle.ManagedDataAccess.21.15.0\lib\net462\Oracle.ManagedDataAccess.dll</HintPath>
+      <HintPath>packages\Oracle.ManagedDataAccess.21.15.0\lib\net462\Oracle.ManagedDataAccess.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -178,5 +178,6 @@
     </VisualStudio>
   </ProjectExtensions>
 </Project>
+
 
 

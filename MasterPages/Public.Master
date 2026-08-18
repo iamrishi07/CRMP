@@ -12,9 +12,11 @@
     </style>
 </head>
 <body>
+  <form id="form1" runat="server">
   <asp:ContentPlaceHolder ID="MainContent" runat="server"/>
   <div id="toast-container"></div>
   <script src="<%=ResolveUrl("~/Scripts/portal.js")%>"></script>
   <asp:ContentPlaceHolder ID="BodyScripts" runat="server"/>
+  </form>
 </body>
 </html>
