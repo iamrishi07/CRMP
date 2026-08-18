@@ -1,0 +1,20 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeFile="Public.Master.cs" Inherits="CRMP.MasterPages.PublicMaster" %>
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title><asp:ContentPlaceHolder ID="PageTitle" runat="server">CRMP Portal</asp:ContentPlaceHolder></title>
+    <link rel="stylesheet" href="<%=ResolveUrl("~/Styles/portal.css")%>"/>
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server"/>
+    <style>
+      body { background: var(--gray-50); min-height: 100vh; }
+    </style>
+</head>
+<body>
+  <asp:ContentPlaceHolder ID="MainContent" runat="server"/>
+  <div id="toast-container"></div>
+  <script src="<%=ResolveUrl("~/Scripts/portal.js")%>"></script>
+  <asp:ContentPlaceHolder ID="BodyScripts" runat="server"/>
+</body>
+</html>

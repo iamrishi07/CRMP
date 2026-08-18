@@ -1,0 +1,235 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeFile="Site.Master.cs" Inherits="CRMP.MasterPages.SiteMaster" %>
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="robots" content="noindex,nofollow"/>
+    <title><asp:ContentPlaceHolder ID="PageTitle" runat="server">CRMP Portal</asp:ContentPlaceHolder> — CRMP</title>
+    <link rel="stylesheet" href="<%=ResolveUrl("~/Styles/portal.css")%>"/>
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server"/>
+</head>
+<body>
+
+<!-- Announcement Banner (active announcements) -->
+<asp:Repeater ID="rptBanners" runat="server">
+  <ItemTemplate>
+    <div class="ann-banner ann-banner-<%# Eval("Severity").ToString().ToLower() %>">
+      <span class="ann-banner-icon"><%# Eval("Severity").ToString()=="CRITICAL"?"🚨":Eval("Severity").ToString()=="WARNING"?"⚠":"ℹ" %></span>
+      <span><strong><%# Eval("Title") %>:</strong> <%# Eval("Content") %></span>
+      <button class="ann-dismiss" title="Dismiss" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:16px;opacity:.6">×</button>
+    </div>
+  </ItemTemplate>
+</asp:Repeater>
+
+<div class="portal-layout">
+
+  <!-- ── Sidebar ──────────────────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <span class="sidebar-brand-name">CRMP Portal</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <!-- EMPLOYEE -->
+      <asp:Panel ID="navEmployee" runat="server" Visible="false">
+        <div class="sidebar-section-label">Employee</div>
+        <a href="<%=ResolveUrl("~/Pages/Employee/Dashboard.aspx")%>">
+          <span class="nav-icon">🏠</span><span>My Dashboard</span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/Employee/NewRequest.aspx")%>">
+          <span class="nav-icon">➕</span><span>New Request</span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/Employee/MyRequests.aspx")%>">
+          <span class="nav-icon">📋</span><span>My Requests</span>
+        </a>
+      </asp:Panel>
+
+      <!-- APPROVER -->
+      <asp:Panel ID="navApprover" runat="server" Visible="false">
+        <div class="sidebar-section-label">Approver</div>
+        <a href="<%=ResolveUrl("~/Pages/Approver/PendingApprovals.aspx")%>">
+          <span class="nav-icon">✅</span><span>Pending Approvals</span>
+          <span class="nav-badge" id="pendingCount" runat="server"></span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/Approver/Delegations.aspx")%>">
+          <span class="nav-icon">🔄</span><span>My Delegations</span>
+        </a>
+      </asp:Panel>
+
+      <!-- TECH EXPERT -->
+      <asp:Panel ID="navTechExpert" runat="server" Visible="false">
+        <div class="sidebar-section-label">Tech Expert</div>
+        <a href="<%=ResolveUrl("~/Pages/TechExpert/Pool.aspx")%>">
+          <span class="nav-icon">🎯</span><span>Available Pool</span>
+          <span class="nav-badge" id="poolCount" runat="server"></span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/TechExpert/MyWork.aspx")%>">
+          <span class="nav-icon">🔧</span><span>My Active Work</span>
+        </a>
+      </asp:Panel>
+
+      <!-- MODERATOR -->
+      <asp:Panel ID="navModerator" runat="server" Visible="false">
+        <div class="sidebar-section-label">Moderator</div>
+        <a href="<%=ResolveUrl("~/Pages/Moderator/Dashboard.aspx")%>">
+          <span class="nav-icon">📊</span><span>Category Overview</span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/Moderator/RequestList.aspx")%>">
+          <span class="nav-icon">📋</span><span>All Requests</span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/Moderator/Connections.aspx")%>">
+          <span class="nav-icon">🔌</span><span>Connections</span>
+        </a>
+      </asp:Panel>
+
+      <!-- OIC IT -->
+      <asp:Panel ID="navOIC" runat="server" Visible="false">
+        <div class="sidebar-section-label">OIC IT</div>
+        <a href="<%=ResolveUrl("~/Pages/OIC/Dashboard.aspx")%>">
+          <span class="nav-icon">📊</span><span>Dashboard</span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/OIC/AllRequests.aspx")%>">
+          <span class="nav-icon">📋</span><span>All Requests</span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/OIC/UserManagement.aspx")%>">
+          <span class="nav-icon">👥</span><span>Users & Roles</span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/OIC/WorkflowAdmin.aspx")%>">
+          <span class="nav-icon">⚙️</span><span>Workflows</span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/OIC/FormBuilder.aspx")%>">
+          <span class="nav-icon">📝</span><span>Form Builder</span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/OIC/SLAConfig.aspx")%>">
+          <span class="nav-icon">⏱️</span><span>SLA Config</span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/OIC/Reports.aspx")%>">
+          <span class="nav-icon">📈</span><span>Reports</span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/OIC/KnowledgeBase.aspx")%>">
+          <span class="nav-icon">📚</span><span>Knowledge Base</span>
+        </a>
+        <a href="<%=ResolveUrl("~/Pages/OIC/Announcements.aspx")%>">
+          <span class="nav-icon">📢</span><span>Announcements</span>
+        </a>
+      </asp:Panel>
+
+      <!-- SHARED -->
+      <div class="sidebar-section-label">General</div>
+      <a href="<%=ResolveUrl("~/Pages/Shared/KnowledgeBase.aspx")%>">
+        <span class="nav-icon">📚</span><span>Knowledge Base</span>
+      </a>
+      <a href="<%=ResolveUrl("~/Pages/Shared/StatusBoard.aspx")%>">
+        <span class="nav-icon">🌐</span><span>Status Board</span>
+      </a>
+      <a href="<%=ResolveUrl("~/Pages/Shared/Profile.aspx")%>">
+        <span class="nav-icon">👤</span><span>My Profile</span>
+      </a>
+    </nav>
+
+    <div style="padding:16px 20px;border-top:1px solid rgba(255,255,255,.06)">
+      <a href="<%=ResolveUrl("~/Pages/Auth/Login.aspx?logout=1")%>" style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.4);font-size:12.5px;font-weight:500;text-decoration:none;transition:.2s" onmouseenter="this.style.color='#fff'" onmouseleave="this.style.color='rgba(255,255,255,.4)'">
+        <span>🚪</span><span>Sign Out</span>
+      </a>
+    </div>
+  </aside><!-- /sidebar -->
+
+  <!-- ── Main Area ─────────────────────────────────────────────────────── -->
+  <div class="main-area">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <button class="topbar-toggle" id="sidebarToggle" title="Toggle Sidebar">☰</button>
+
+      <div class="topbar-search">
+        <span class="topbar-search-icon">🔍</span>
+        <input type="text" id="globalSearch" placeholder="Search requests…" autocomplete="off"
+               onkeydown="if(event.key==='Enter'&&this.value.trim())window.location='/Pages/Employee/MyRequests.aspx?q='+encodeURIComponent(this.value.trim())"/>
+      </div>
+
+      <div class="topbar-spacer"></div>
+
+      <div class="topbar-actions">
+
+        <!-- Role Switcher -->
+        <div class="role-switcher">
+          <div class="role-badge" id="roleBadge">
+            <span class="role-badge-dot"></span>
+            <span id="activeRoleName"><%=ActiveRoleName%></span>
+            <span style="color:var(--gray-400);font-size:10px">▼</span>
+          </div>
+          <div class="role-dropdown" id="roleDropdown">
+            <div style="padding:8px 12px;font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase">Switch Role</div>
+            <asp:Repeater ID="rptRoles" runat="server">
+              <ItemTemplate>
+                <div class="role-option <%# (int)Eval("RoleId")==ActiveRoleId?"active":"" %>"
+                     onclick="switchRole('<%# Eval("UserRoleId") %>','<%# Eval("DivisionId") %>')">
+                  <span><%# GetRoleIcon(Eval("RoleCode").ToString()) %></span>
+                  <div>
+                    <div style="font-size:13px;font-weight:600"><%# Eval("RoleName") %></div>
+                    <asp:Label runat="server" Visible='<%# Eval("DivisionName") != null && Eval("DivisionName").ToString() != "" %>'>
+                      <span style="font-size:11px;color:var(--text-muted)"><%# Eval("DivisionName") %></span>
+                    </asp:Label>
+                  </div>
+                </div>
+              </ItemTemplate>
+            </asp:Repeater>
+          </div>
+        </div>
+        <!-- Hidden role switch form -->
+        <form id="roleSwitchForm" method="post" action="<%=ResolveUrl("~/Handlers/RoleSwitch.ashx")%>">
+          <input type="hidden" id="hfSwitchRoleId" name="roleId"/>
+          <input type="hidden" id="hfSwitchDivId" name="divId"/>
+          <input type="hidden" name="returnUrl" value="<%=Server.UrlEncode(Request.RawUrl)%>"/>
+        </form>
+
+        <!-- Notification Bell -->
+        <div class="notif-bell" style="position:relative">
+          <button class="notif-bell-btn" id="notifBellBtn" title="Notifications">🔔</button>
+          <span class="notif-count" id="notifCount" style="display:none">0</span>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-dd-header">
+              <h4>Notifications</h4>
+              <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
+            </div>
+            <div id="notifList" style="max-height:360px;overflow-y:auto"></div>
+            <div style="padding:10px 16px;border-top:1px solid var(--border);text-align:center">
+              <a href="<%=ResolveUrl("~/Pages/Shared/Notifications.aspx")%>" style="font-size:12px">View all notifications</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Avatar -->
+        <div style="display:flex;align-items:center;gap:8px;padding:0 4px">
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--color-primary),var(--color-accent));display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700">
+            <%=UserInitials%>
+          </div>
+          <div style="display:flex;flex-direction:column;line-height:1.2">
+            <span style="font-size:13px;font-weight:600;color:var(--text-primary)"><%=UserFullName%></span>
+            <span style="font-size:11px;color:var(--text-muted)"><%=UserDivision%></span>
+          </div>
+        </div>
+
+      </div><!-- /topbar-actions -->
+    </header><!-- /topbar -->
+
+    <!-- Page Content -->
+    <main class="page-content">
+      <asp:ContentPlaceHolder ID="MainContent" runat="server"/>
+    </main>
+
+  </div><!-- /main-area -->
+</div><!-- /portal-layout -->
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Mobile overlay -->
+<div id="sidebarOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99"></div>
+
+<script src="<%=ResolveUrl("~/Scripts/portal.js")%>"></script>
+<asp:ContentPlaceHolder ID="BodyScripts" runat="server"/>
+</body>
+</html>

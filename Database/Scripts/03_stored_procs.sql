@@ -1,0 +1,175 @@
+-- ============================================================
+--  CRMP - 03_stored_procs.sql
+--  Supporting stored procedures (optional layer — most queries
+--  use inline SQL via OracleHelper for flexibility, but stored
+--  procs are provided here for DBA review and optional migration)
+-- ============================================================
+
+-- ── USP_GET_PENDING_FOR_APPROVER ─────────────────────────────────────────
+CREATE OR REPLACE PROCEDURE USP_GET_PENDING_FOR_APPROVER (
+    P_APPROVER_ID IN NUMBER,
+    P_CURSOR      OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN P_CURSOR FOR
+        SELECT r.REQUEST_ID, r.REQUEST_NUMBER, r.TYPE_ID, rt.TYPE_NAME, rt.TYPE_CODE,
+               sc.CATEGORY_ID, sc.CATEGORY_NAME, sc.COLOR_HEX,
+               r.SUBMITTER_USER_ID, su.FULL_NAME AS SUBMITTER_NAME,
+               r.DIVISION_ID, d.DIVISION_NAME,
+               r.STATUS, r.CURRENT_STAGE_ID, ws.STAGE_NAME AS CURRENT_STAGE_NAME,
+               r.SUMMARY, r.PRIORITY,
+               r.SLA_DEADLINE, r.IS_SLA_BREACHED, r.SUBMITTED_AT, r.UPDATED_AT
+        FROM   REQUESTS r
+        JOIN   REQUEST_TYPES rt ON rt.TYPE_ID = r.TYPE_ID
+        JOIN   SERVICE_CATEGORIES sc ON sc.CATEGORY_ID = rt.CATEGORY_ID
+        JOIN   USERS su ON su.USER_ID = r.SUBMITTER_USER_ID
+        JOIN   DIVISIONS d ON d.DIVISION_ID = r.DIVISION_ID
+        LEFT JOIN WORKFLOW_STAGES ws ON ws.STAGE_ID = r.CURRENT_STAGE_ID
+        WHERE EXISTS (
+            SELECT 1 FROM REQUEST_APPROVALS ra
+            WHERE  ra.REQUEST_ID = r.REQUEST_ID
+              AND  ra.APPROVER_USER_ID = P_APPROVER_ID
+              AND  ra.ACTION = 'PENDING'
+        )
+        ORDER BY r.SLA_DEADLINE ASC NULLS LAST, r.SUBMITTED_AT ASC;
+END USP_GET_PENDING_FOR_APPROVER;
+/
+
+-- ── USP_GET_TECH_EXPERT_POOL ──────────────────────────────────────────────
+CREATE OR REPLACE PROCEDURE USP_GET_TECH_EXPERT_POOL (
+    P_TECH_EXPERT_ID IN NUMBER,
+    P_CURSOR         OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN P_CURSOR FOR
+        SELECT r.REQUEST_ID, r.REQUEST_NUMBER, r.TYPE_ID, rt.TYPE_NAME,
+               sc.CATEGORY_ID, sc.CATEGORY_NAME, sc.COLOR_HEX,
+               r.SUBMITTER_USER_ID, su.FULL_NAME AS SUBMITTER_NAME,
+               r.DIVISION_ID, d.DIVISION_NAME,
+               r.STATUS, r.SUMMARY, r.PRIORITY,
+               r.SLA_DEADLINE, r.IS_SLA_BREACHED, r.SUBMITTED_AT
+        FROM   REQUESTS r
+        JOIN   REQUEST_TYPES rt ON rt.TYPE_ID = r.TYPE_ID
+        JOIN   SERVICE_CATEGORIES sc ON sc.CATEGORY_ID = rt.CATEGORY_ID
+        JOIN   USERS su ON su.USER_ID = r.SUBMITTER_USER_ID
+        JOIN   DIVISIONS d ON d.DIVISION_ID = r.DIVISION_ID
+        WHERE  r.STATUS = 'APPROVED'
+          AND  r.TECH_EXPERT_ID IS NULL
+          AND  rt.CATEGORY_ID IN (
+              SELECT tec.CATEGORY_ID FROM TECH_EXPERT_CATEGORIES tec
+              WHERE  tec.USER_ID = P_TECH_EXPERT_ID AND tec.IS_ACTIVE = 1
+          )
+        ORDER BY r.SLA_DEADLINE ASC NULLS LAST;
+END USP_GET_TECH_EXPERT_POOL;
+/
+
+-- ── USP_ADVANCE_WORKFLOW ──────────────────────────────────────────────────
+-- Called after an approval action — advances or finalises the request.
+-- This mirrors the C# WorkflowEngine logic for DBA use / DB triggers if desired.
+CREATE OR REPLACE PROCEDURE USP_ADVANCE_WORKFLOW (
+    P_REQUEST_ID    IN NUMBER,
+    P_CURRENT_ORDER IN NUMBER   -- the stage_order that was just approved
+) AS
+    V_WORKFLOW_ID   NUMBER;
+    V_NEXT_STAGE    NUMBER := NULL;
+    V_NEXT_ROLE     NUMBER;
+    V_DIV_ID        NUMBER;
+    V_SUBMITTER     NUMBER;
+BEGIN
+    SELECT rt.WORKFLOW_ID, r.DIVISION_ID, r.SUBMITTER_USER_ID
+    INTO   V_WORKFLOW_ID, V_DIV_ID, V_SUBMITTER
+    FROM   REQUESTS r
+    JOIN   REQUEST_TYPES rt ON rt.TYPE_ID = r.TYPE_ID
+    WHERE  r.REQUEST_ID = P_REQUEST_ID;
+
+    -- Find next active stage
+    BEGIN
+        SELECT STAGE_ID, ROLE_ID INTO V_NEXT_STAGE, V_NEXT_ROLE
+        FROM   WORKFLOW_STAGES
+        WHERE  WORKFLOW_ID = V_WORKFLOW_ID
+          AND  STAGE_ORDER > P_CURRENT_ORDER
+          AND  IS_ACTIVE = 1
+        ORDER BY STAGE_ORDER
+        FETCH FIRST 1 ROW ONLY;
+    EXCEPTION WHEN NO_DATA_FOUND THEN
+        V_NEXT_STAGE := NULL;
+    END;
+
+    IF V_NEXT_STAGE IS NULL THEN
+        -- All stages done
+        UPDATE REQUESTS SET STATUS='APPROVED', CURRENT_STAGE_ID=NULL, UPDATED_AT=SYSTIMESTAMP
+        WHERE REQUEST_ID = P_REQUEST_ID;
+    ELSE
+        UPDATE REQUESTS SET STATUS='PENDING_APPROVAL', CURRENT_STAGE_ID=V_NEXT_STAGE, UPDATED_AT=SYSTIMESTAMP
+        WHERE REQUEST_ID = P_REQUEST_ID;
+    END IF;
+
+    COMMIT;
+END USP_ADVANCE_WORKFLOW;
+/
+
+-- ── USP_DASHBOARD_STATS ───────────────────────────────────────────────────
+CREATE OR REPLACE PROCEDURE USP_DASHBOARD_STATS (
+    P_DIVISION_ID  IN  NUMBER  DEFAULT NULL,
+    P_CATEGORY_ID  IN  NUMBER  DEFAULT NULL,
+    P_CURSOR       OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN P_CURSOR FOR
+        SELECT
+            COUNT(*) AS TOTAL,
+            SUM(CASE WHEN r.STATUS = 'PENDING_APPROVAL' THEN 1 ELSE 0 END) AS PENDING,
+            SUM(CASE WHEN r.STATUS = 'IN_PROGRESS'      THEN 1 ELSE 0 END) AS IN_PROGRESS,
+            SUM(CASE WHEN r.STATUS IN ('RESOLVED','CLOSED') THEN 1 ELSE 0 END) AS RESOLVED,
+            SUM(CASE WHEN r.IS_SLA_BREACHED = 1 THEN 1 ELSE 0 END) AS SLA_BREACHED,
+            ROUND(AVG(
+                CASE WHEN r.RESOLVED_AT IS NOT NULL
+                THEN (CAST(r.RESOLVED_AT AS DATE) - CAST(r.SUBMITTED_AT AS DATE)) * 24
+                END
+            ), 1) AS AVG_RESOLUTION_HRS
+        FROM REQUESTS r
+        JOIN REQUEST_TYPES rt ON rt.TYPE_ID = r.TYPE_ID
+        WHERE (P_DIVISION_ID IS NULL OR r.DIVISION_ID = P_DIVISION_ID)
+          AND (P_CATEGORY_ID IS NULL OR rt.CATEGORY_ID = P_CATEGORY_ID);
+END USP_DASHBOARD_STATS;
+/
+
+-- ── USP_RESOLVE_REQUEST ───────────────────────────────────────────────────
+CREATE OR REPLACE PROCEDURE USP_RESOLVE_REQUEST (
+    P_REQUEST_ID      IN NUMBER,
+    P_TECH_EXPERT_ID  IN NUMBER,
+    P_RESOLUTION_NOTES IN CLOB
+) AS
+BEGIN
+    UPDATE REQUESTS SET
+        STATUS           = 'RESOLVED',
+        RESOLUTION_NOTES = P_RESOLUTION_NOTES,
+        RESOLVED_AT      = SYSTIMESTAMP,
+        UPDATED_AT       = SYSTIMESTAMP
+    WHERE REQUEST_ID    = P_REQUEST_ID
+      AND TECH_EXPERT_ID = P_TECH_EXPERT_ID
+      AND STATUS        = 'IN_PROGRESS';
+
+    -- Insert timeline entry
+    INSERT INTO REQUEST_TIMELINE (TIMELINE_ID, REQUEST_ID, EVENT_TYPE, EVENT_DESC, PERFORMED_BY)
+    VALUES (SEQ_TIMELINE.NEXTVAL, P_REQUEST_ID, 'RESOLVED',
+            'Request resolved by technical expert.', P_TECH_EXPERT_ID);
+
+    COMMIT;
+END USP_RESOLVE_REQUEST;
+/
+
+-- ── USP_SLA_CHECK ─────────────────────────────────────────────────────────
+-- Returns all newly-breached request IDs for the SLA engine to process
+CREATE OR REPLACE PROCEDURE USP_SLA_CHECK (
+    P_CURSOR OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN P_CURSOR FOR
+        SELECT REQUEST_ID, REQUEST_NUMBER, SUBMITTER_USER_ID, DIVISION_ID, TYPE_ID
+        FROM   REQUESTS
+        WHERE  SLA_DEADLINE < SYSTIMESTAMP
+          AND  IS_SLA_BREACHED = 0
+          AND  STATUS NOT IN ('RESOLVED','CLOSED','REJECTED','CANCELLED');
+END USP_SLA_CHECK;
+/
