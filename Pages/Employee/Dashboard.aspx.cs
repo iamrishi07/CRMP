@@ -8,7 +8,7 @@ namespace CRMP.Pages.Employee
 {
     public partial class Dashboard : BasePage
     {
-        protected override string[] GetRequiredRoles() => new[] { "EMPLOYEE" };
+        protected override string[] GetRequiredRoles() { return new[] { "EMPLOYEE" }; }
 
         private readonly RequestRepository _reqRepo = new RequestRepository();
         private readonly CatalogRepository _catRepo = new CatalogRepository();
@@ -62,9 +62,9 @@ namespace CRMP.Pages.Employee
             if (!deadline.HasValue) return "No SLA";
             var remaining = deadline.Value - DateTime.Now;
             if (remaining.TotalHours < 0) return "BREACHED";
-            if (remaining.TotalHours < 1) return $"{(int)remaining.TotalMinutes}m left";
-            if (remaining.TotalDays < 1) return $"{(int)remaining.TotalHours}h left";
-            return $"{(int)remaining.TotalDays}d left";
+            if (remaining.TotalHours < 1) return string.Format("{0}m left", (int)remaining.TotalMinutes);
+            if (remaining.TotalDays < 1) return string.Format("{0}h left", (int)remaining.TotalHours);
+            return string.Format("{0}d left", (int)remaining.TotalDays);
         }
 
         protected string GetAnnStyle(string severity)

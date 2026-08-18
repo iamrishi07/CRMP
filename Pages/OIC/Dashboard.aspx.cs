@@ -10,7 +10,7 @@ namespace CRMP.Pages.OIC
 {
     public partial class Dashboard : BasePage
     {
-        protected override string[] GetRequiredRoles() => new[] { "OIC_IT" };
+        protected override string[] GetRequiredRoles() { return new[] { "OIC_IT" }; }
 
         private readonly RequestRepository _reqRepo = new RequestRepository();
 
@@ -95,8 +95,8 @@ namespace CRMP.Pages.OIC
         protected string GetAge(DateTime submittedAt)
         {
             var age = DateTime.Now - submittedAt;
-            if (age.TotalDays >= 1) return $"{(int)age.TotalDays}d ago";
-            return $"{(int)age.TotalHours}h ago";
+            if (age.TotalDays >= 1) return string.Format("{0}d ago", (int)age.TotalDays);
+            return string.Format("{0}h ago", (int)age.TotalHours);
         }
 
         private string StatusDisplayName(string s)

@@ -9,8 +9,7 @@ namespace CRMP.Pages.Approver
 {
     public partial class PendingApprovals : BasePage
     {
-        protected override string[] GetRequiredRoles() =>
-            new[] { "DIVISION_HEAD", "ISO", "ADMIN_HR", "DIRECTOR" };
+        protected override string[] GetRequiredRoles() { return new[] { "DIVISION_HEAD", "ISO", "ADMIN_HR", "DIRECTOR" }; }
 
         private readonly RequestRepository _reqRepo  = new RequestRepository();
         private readonly CatalogRepository _catRepo  = new CatalogRepository();
@@ -31,7 +30,7 @@ namespace CRMP.Pages.Approver
             LoadList();
         }
 
-        protected void ApplyFilter(object sender, EventArgs e) => LoadList();
+        protected void ApplyFilter(object sender, EventArgs e) { LoadList(); }
 
         private void LoadList()
         {
@@ -71,7 +70,7 @@ namespace CRMP.Pages.Approver
 
             WorkflowEngine.ProcessBulkApproval(ids, CurrentUserId, remarks, action == "APPROVED");
 
-            ShowToast($"{ids.Count} request(s) {(action == "APPROVED" ? "approved" : "rejected")} successfully.", "success");
+            ShowToast(string.Format("{0} request(s) {1} successfully.", ids.Count, action == "APPROVED" ? "approved" : "rejected"), "success");
             LoadList();
         }
 
@@ -81,8 +80,8 @@ namespace CRMP.Pages.Approver
             if (!deadline.HasValue) return "No SLA";
             var rem = deadline.Value - DateTime.Now;
             if (rem.TotalHours < 0) return "BREACHED";
-            if (rem.TotalDays < 1) return $"{(int)rem.TotalHours}h left";
-            return $"{(int)rem.TotalDays}d left";
+            if (rem.TotalDays < 1) return string.Format("{0}h left", (int)rem.TotalHours);
+            return string.Format("{0}d left", (int)rem.TotalDays);
         }
     }
 }

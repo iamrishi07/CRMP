@@ -9,7 +9,7 @@ namespace CRMP.Pages.TechExpert
 {
     public partial class Pool : BasePage
     {
-        protected override string[] GetRequiredRoles() => new[] { "TECH_EXPERT" };
+        protected override string[] GetRequiredRoles() { return new[] { "TECH_EXPERT" }; }
 
         private readonly RequestRepository _reqRepo = new RequestRepository();
 
@@ -36,19 +36,19 @@ namespace CRMP.Pages.TechExpert
             _reqRepo.AssignTechExpert(requestId, CurrentUserId);
             _reqRepo.UpdateStatus(requestId, "IN_PROGRESS");
             _reqRepo.AddTimeline(requestId, "NOTE",
-                $"Request picked up by technical expert {SessionHelper.FullName}.",
+                string.Format("Request picked up by technical expert {0}.", SessionHelper.FullName),
                 CurrentUserId);
 
             // Notify submitter
             var req = _reqRepo.GetById(requestId);
             NotificationService.Notify(req.SubmitterUserId,
                 "Request Being Processed",
-                $"Your request {req.RequestNumber} has been picked up by a technical expert and is now in progress.",
-                $"~/Pages/Employee/RequestDetail.aspx?id={requestId}",
+                string.Format("Your request {0} has been picked up by a technical expert and is now in progress.", req.RequestNumber),
+                string.Format("~/Pages/Employee/RequestDetail.aspx?id={0}", requestId),
                 NotificationService.Types.RequestAssigned);
 
             ShowToast("Request picked up successfully!", "success");
-            Response.Redirect($"WorkDetail.aspx?id={requestId}");
+            Response.Redirect(string.Format("WorkDetail.aspx?id={0}", requestId));
         }
 
         protected string GetSlaLabel(DateTime? deadline)
@@ -56,8 +56,8 @@ namespace CRMP.Pages.TechExpert
             if (!deadline.HasValue) return "No SLA";
             var rem = deadline.Value - DateTime.Now;
             if (rem.TotalHours < 0) return "BREACHED";
-            if (rem.TotalDays < 1) return $"{(int)rem.TotalHours}h left";
-            return $"{(int)rem.TotalDays}d left";
+            if (rem.TotalDays < 1) return string.Format("{0}h left", (int)rem.TotalHours);
+            return string.Format("{0}d left", (int)rem.TotalDays);
         }
     }
 }

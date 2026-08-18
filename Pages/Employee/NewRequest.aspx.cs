@@ -12,14 +12,14 @@ namespace CRMP.Pages.Employee
 {
     public partial class NewRequest : BasePage
     {
-        protected override string[] GetRequiredRoles() => new[] { "EMPLOYEE" };
+        protected override string[] GetRequiredRoles() { return new[] { "EMPLOYEE" }; }
 
         private readonly CatalogRepository _catRepo = new CatalogRepository();
         private readonly RequestRepository _reqRepo  = new RequestRepository();
         private readonly UserRepository    _userRepo = new UserRepository();
 
-        private int CurrentStep  => int.TryParse(hfStep.Value, out int s) ? s : 1;
-        private int SelectedType => int.TryParse(hfTypeId.Value, out int t) ? t : 0;
+        private int CurrentStep { get { int s; return int.TryParse(hfStep.Value, out s) ? s : 1; } }
+        private int SelectedType { get { int t; return int.TryParse(hfTypeId.Value, out t) ? t : 0; } }
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -86,7 +86,7 @@ namespace CRMP.Pages.Employee
                 int uid = int.Parse(e.CommandArgument.ToString());
                 var user = _userRepo.GetById(uid);
                 hfBehalfUserId.Value = uid.ToString();
-                litBehalfName.Text = user?.FullName ?? "";
+                litBehalfName.Text = (user != null ? user.FullName : null) ?? "";
                 pnlSelectedBehalf.Visible = true;
                 pnlBehalfResults.Visible  = false;
             }
@@ -111,26 +111,26 @@ namespace CRMP.Pages.Employee
             pnlStep3.Visible = false; pnlStep4.Visible = false;
 
             var rt = _catRepo.GetRequestTypeById(SelectedType);
-            litStep2TypeName.Text = rt?.TypeName ?? "";
+            litStep2TypeName.Text = (rt != null ? rt.TypeName : null) ?? "";
 
             // Load templates for this type
             LoadTemplates();
 
             // Render dynamic form fields
             phFields.Controls.Clear();
-            if (rt?.Fields != null)
+            if ((rt != null && rt.Fields != null))
             {
                 foreach (var field in rt.Fields)
                     phFields.Controls.Add(BuildFieldControl(field));
 
                 // Emit field config JSON for JS
-                var json = System.Web.Script.Serialization.JavaScriptSerializer_Compat.SerializeFields(rt.Fields);
+                var json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(rt.Fields);
                 var hf = new HiddenField { ID = "hfFieldsJson", Value = json };
                 phFields.Controls.Add(hf);
 
                 // Startup script to init DynamicForm
                 Page.ClientScript.RegisterStartupScript(GetType(), "initForm",
-                    $"DynamicForm.init(document.getElementById('hfFieldsJson').value);", true);
+                    "DynamicForm.init(document.getElementById('hfFieldsJson').value);", true);
             }
         }
 
@@ -138,14 +138,14 @@ namespace CRMP.Pages.Employee
         {
             var wrap = new HtmlGenericControl("div");
             wrap.Attributes["class"] = "form-group";
-            wrap.Attributes["id"] = $"field-wrap-{field.FieldId}";
+            wrap.Attributes["id"] = "field-wrap-" + field.FieldId;
 
             if (field.IsConditional)
                 wrap.Style["display"] = "none"; // JS controls visibility
 
             var label = new HtmlGenericControl("label");
             label.Attributes["class"] = "form-label";
-            label.Attributes["for"] = $"ff_{field.FieldId}";
+            label.Attributes["for"] = "ff_" + field.FieldId;
             label.InnerText = field.FieldLabel;
             if (field.IsRequired) { var req = new HtmlGenericControl("span"); req.Attributes["class"] = "required"; req.InnerText = " *"; label.Controls.Add(req); }
             wrap.Controls.Add(label);
@@ -165,8 +165,8 @@ namespace CRMP.Pages.Employee
 
         private Control CreateInputControl(FormField field)
         {
-            string id = $"ff_{field.FieldId}";
-            string name = $"ff_{field.FieldId}";
+            string id = "ff_" + field.FieldId;
+            string name = "ff_" + field.FieldId;
 
             switch (field.FieldType)
             {
@@ -232,7 +232,7 @@ namespace CRMP.Pages.Employee
             {
                 string json = dt.Rows[0]["FIELD_VALUES_JSON"].ToString();
                 Page.ClientScript.RegisterStartupScript(GetType(), "tpl",
-                    $"DynamicForm.applyTemplate({System.Web.HttpUtility.JavaScriptStringEncode(json, addDoubleQuotes: true)});", true);
+                    string.Format("DynamicForm.applyTemplate({0});", System.Web.HttpUtility.JavaScriptStringEncode(json, true)), true);
             }
         }
 
@@ -241,16 +241,16 @@ namespace CRMP.Pages.Employee
             // Collect all dynamic field values from form
             var rt = _catRepo.GetRequestTypeById(SelectedType);
             var values = new Dictionary<int, string>();
-            if (rt?.Fields != null)
+            if ((rt != null && rt.Fields != null))
             {
                 foreach (var field in rt.Fields)
                 {
-                    string val = Request.Form[$"ff_{field.FieldId}"] ?? "";
+                    string val = Request.Form["ff_" + field.FieldId] ?? "";
                     values[field.FieldId] = val;
                 }
             }
             // Serialize to JSON for storage across postbacks
-            hfFieldValuesJson.Value = Newtonsoft_Compat.ToJson(values);
+            hfFieldValuesJson.Value = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(values);
             hfStep.Value = "3";
             pnlStep1.Visible = false; pnlStep2.Visible = false;
             pnlStep3.Visible = true;  pnlStep4.Visible = false;
@@ -268,14 +268,14 @@ namespace CRMP.Pages.Employee
             pnlStep3.Visible = false; pnlStep4.Visible = true;
 
             var rt = _catRepo.GetRequestTypeById(SelectedType);
-            litReviewType.Text    = rt?.TypeName ?? "";
+            litReviewType.Text    = (rt != null ? rt.TypeName : null) ?? "";
             litReviewSummary.Text = SecurityHelper.HtmlEncode(txtSummary.Text);
-            litReviewPriority.Text = $"<span class='badge badge-priority-{ddlPriority.SelectedValue.ToLower()}'>{ddlPriority.SelectedValue}</span>";
+            litReviewPriority.Text = string.Format("<span class='badge badge-priority-{0}'>{1}</span>", ddlPriority.SelectedValue.ToLower(), ddlPriority.SelectedValue);
 
-            if (rt?.WorkflowId.HasValue == true)
+            if ((rt != null && rt.WorkflowId.HasValue))
             {
                 var wf = _catRepo.GetWorkflowWithStages(rt.WorkflowId.Value);
-                rptReviewWorkflow.DataSource = wf?.Stages;
+                rptReviewWorkflow.DataSource = (wf != null ? wf.Stages : null);
                 rptReviewWorkflow.DataBind();
             }
         }
@@ -306,7 +306,7 @@ namespace CRMP.Pages.Employee
             if (rt.WorkflowId.HasValue)
             {
                 var wf = _catRepo.GetWorkflowWithStages(rt.WorkflowId.Value);
-                if (wf?.Stages.Count > 0)
+                if ((wf != null && wf.Stages != null && wf.Stages.Count > 0))
                     firstStageId = wf.Stages[0].StageId;
             }
             request.CurrentStageId = firstStageId;
@@ -349,14 +349,14 @@ namespace CRMP.Pages.Employee
 
             // Timeline: submitted
             _reqRepo.AddTimeline(requestId, "SUBMITTED",
-                $"Request submitted by {SessionHelper.FullName}" +
-                (request.OnBehalfOfUserId.HasValue ? $" on behalf of user #{request.OnBehalfOfUserId}" : ""),
+                string.Format("Request submitted by {0}", SessionHelper.FullName) +
+                (request.OnBehalfOfUserId.HasValue ? string.Format(" on behalf of user #{0}", request.OnBehalfOfUserId) : ""),
                 CurrentUserId);
 
             // Kick off workflow
             WorkflowEngine.InitiateWorkflow(requestId);
 
-            Response.Redirect($"~/Pages/Employee/RequestDetail.aspx?id={requestId}&submitted=1");
+            Response.Redirect(string.Format("~/Pages/Employee/RequestDetail.aspx?id={0}&submitted=1", requestId));
         }
 
         // Step back handlers
@@ -382,3 +382,5 @@ namespace CRMP.Pages.Employee
         }
     }
 }
+
+
