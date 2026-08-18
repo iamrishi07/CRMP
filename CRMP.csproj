@@ -40,17 +40,18 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- NuGet / ODP.NET references — install via NuGet: Oracle.ManagedDataAccess 21.x -->
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.122.21.1, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Oracle.ManagedDataAccess.21.15.0\lib\net462\Oracle.ManagedDataAccess.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="Oracle.ManagedDataAccess">
-      <HintPath>$(SolutionDir)packages\Oracle.ManagedDataAccess.21.15.0\lib\net462\Oracle.ManagedDataAccess.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Web.config" />
@@ -94,32 +95,68 @@
     <Content Include="Database\Scripts\04_seed_data.sql" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Code\Models\Models.cs" />
-    <Compile Include="App_Code\DAL\UserRepository.cs" />
-    <Compile Include="App_Code\DAL\RequestRepository.cs" />
-    <Compile Include="App_Code\DAL\CatalogRepository.cs" />
-    <Compile Include="App_Code\DAL\ApprovalRepository.cs" />
-    <Compile Include="App_Code\DAL\SupportRepositories.cs" />
-    <Compile Include="App_Code\BLL\WorkflowEngine.cs" />
-    <Compile Include="App_Code\BLL\SlaEngine.cs" />
-    <Compile Include="App_Code\BLL\NotificationService.cs" />
-    <Compile Include="App_Code\BLL\EmailService.cs" />
-    <Compile Include="App_Code\Helpers\OracleHelper.cs" />
-    <Compile Include="App_Code\Helpers\SessionHelper.cs" />
-    <Compile Include="App_Code\Helpers\SecurityHelper.cs" />
-    <Compile Include="App_Code\Helpers\FileHelper.cs" />
-    <Compile Include="App_Code\BasePage.cs" />
+    <Compile Include="Code\Models\Models.cs" />
+    <Compile Include="Code\DAL\UserRepository.cs" />
+    <Compile Include="Code\DAL\RequestRepository.cs" />
+    <Compile Include="Code\DAL\CatalogRepository.cs" />
+    <Compile Include="Code\DAL\ApprovalRepository.cs" />
+    <Compile Include="Code\DAL\SupportRepositories.cs" />
+    <Compile Include="Code\BLL\WorkflowEngine.cs" />
+    <Compile Include="Code\BLL\SlaEngine.cs" />
+    <Compile Include="Code\BLL\NotificationService.cs" />
+    <Compile Include="Code\BLL\EmailService.cs" />
+    <Compile Include="Code\Helpers\OracleHelper.cs" />
+    <Compile Include="Code\Helpers\SessionHelper.cs" />
+    <Compile Include="Code\Helpers\SecurityHelper.cs" />
+    <Compile Include="Code\Helpers\FileHelper.cs" />
+    <Compile Include="Code\BasePage.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="Handlers\NotificationPoll.ashx.cs" />
-    <Compile Include="MasterPages\Site.Master.cs" />
-    <Compile Include="MasterPages\Public.Master.cs" />
-    <Compile Include="Pages\Auth\Login.aspx.cs" />
-    <Compile Include="Pages\Employee\Dashboard.aspx.cs" />
-    <Compile Include="Pages\Employee\NewRequest.aspx.cs" />
-    <Compile Include="Pages\Approver\PendingApprovals.aspx.cs" />
-    <Compile Include="Pages\TechExpert\Pool.aspx.cs" />
-    <Compile Include="Pages\OIC\Dashboard.aspx.cs" />
+    <Compile Include="MasterPages\Site.Master.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="MasterPages\Public.Master.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Auth\Login.aspx.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Employee\Dashboard.aspx.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Employee\NewRequest.aspx.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Approver\PendingApprovals.aspx.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\TechExpert\Pool.aspx.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\OIC\Dashboard.aspx.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="Global.asax.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:59069/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

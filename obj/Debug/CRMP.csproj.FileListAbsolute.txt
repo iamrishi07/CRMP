@@ -1,0 +1,2 @@
+C:\Users\rishi\.gemini\antigravity-ide\scratch\CRMP\obj\Debug\CRMP.csproj.AssemblyReference.cache
+C:\Users\rishi\.gemini\antigravity-ide\scratch\CRMP\obj\Debug\CRMP.csproj.CoreCompileInputs.cache
